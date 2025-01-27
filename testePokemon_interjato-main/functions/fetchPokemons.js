@@ -1,6 +1,4 @@
-export const fetchPokemons = async () => {      //Função responsável por buscar todos os pokemons
-    const url = "https://pokeapi.co/api/v2/pokemon/";
-
+export const fetchPokemon =  async (url) => {
     const req = await fetch(url);
     const res = await req.json();
 

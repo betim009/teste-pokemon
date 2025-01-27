@@ -1,4 +1,4 @@
-import { fetchPokemons } from "./functions/fetchPokemons.js";
+import { fetchPokemon } from "./functions/fetchPokemons.js";
 
 const divPokemons = document.getElementById('div-pokemons');        //Pega a div no html;
 const btnPrevious = document.getElementById('btn-previous');        //Pega o botão de previous;
@@ -8,43 +8,49 @@ const researchPokemon = document.getElementById('research-pokemon');        //Pe
 const pokemonTrue = document.getElementById('pokemon-true');
 const previous = document.getElementById('previous');
 
-let pokemonsDisplay = [];       //Cria um array vazio para armazenar os podemons que serão exibidos;
 let data = null;
 
 window.addEventListener('DOMContentLoaded', async () => {       //
-    data = await fetchPokemons();       //Armazena o aguardo da api; 
-    pokemonsDisplay = data.results;
+    data = await fetchPokemon('https://pokeapi.co/api/v2/pokemon?limit=1');       //Armazena o aguardo da api; 
+    const { results } = data;
+    const [pokemon] = results;
+    const { name, url } = pokemon;
 
-    pokemonsDisplay.forEach((e, i) => {     //Cria uma div com o nome para cada pokemon;
-        divPokemons.innerHTML += `
+    const details = await fetchPokemon(url);
+    console.log(details.sprites.front_default)
+
+    //Cria uma div com o nome para cada pokemon;
+    divPokemons.innerHTML += `
             <div>
-                <h4>${e.name}</h4>
+                <img src="${details.sprites.front_default}" />
+                <h4>${name}</h4>
             </div>
         `
-    });
 });
 
 btnNext.addEventListener('click', async () => {
-    const req = await fetch(data.next);
-    const res = await req.json();
+    const { next } = data;
+    data = await fetchPokemon(next);
 
-    pokemonsDisplay = res.results;
-    
-    divPokemons.innerHTML = "";     //Limpa a tela;
-    pokemonsDisplay.forEach((e, i) => {
-        divPokemons.innerHTML += `
-            <div>
-                <h4>${e.name}</h4>
-            </div>
-        `
-    });
+    const { results } = data;
+    const [pokemon] = results;
+    const { name, url } = pokemon;
+    const details = await fetchPokemon(url);
+
+    divPokemons.innerHTML = "";
+    divPokemons.innerHTML += `
+    <div>
+        <img src="${details.sprites.front_default}" />
+        <h4>${name}</h4>
+    </div>
+`
 });
 
 researchPokemon.addEventListener('click', async () => {     //Função que vai renderizar nome do pokemon pesquisado na tela;
 
     const name = inputNamePokemon.value
 
-    if(name === "") {
+    if (name === "") {
         return alert('Digite algum nome de Pokemon válido!');
     }
 
@@ -78,7 +84,7 @@ researchPokemon.addEventListener('click', async () => {     //Função que vai r
 });
 
 //previous
-btnPrevious.addEventListener('click', async() => {
+btnPrevious.addEventListener('click', async () => {
     const req = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
     const res = await req.json();
 
